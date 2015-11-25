@@ -31,7 +31,7 @@ setkey(YZ, npi)
 Detailed_Data <- rbind(A,B,C,D,EFG,HIJ,KL,MN,OPQ,R,S,TUVWX,YZ)
 setkey(Detailed_Data, npi)
 
-tmp <- Detailed_Data[provider_type == "Cardiology"]
+tmp <- Detailed_Data[provider_type == "Cardiac Electrophysiology"]
 Midwest <- c("ND","SD","NE","KS","MN","IA","MO","WI","IL","MI","IN","OH")
 Detailed_Midwest <- tmp[nppes_provider_state %in% Midwest]
 setkey(Detailed_Midwest, npi)
@@ -60,3 +60,7 @@ colnames(Dataframe_Midwest)[1] <- "NPI"
 
 Midwest <- as.data.table(Dataframe_Midwest)
 setkey(Midwest, NPI)
+
+Midwest_Cardiology <- Midwest
+Midwest_Surgery <- Midwest
+Midwest_Electrophysiology <- Midwest
