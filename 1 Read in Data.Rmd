@@ -11,3 +11,8 @@ load("~/Dropbox/STAT992/DataSource/Midwest.RData")
 load("~/Dropbox/STAT992/DataSource/Dat.RData")
 load("~/Dropbox/STAT992/DataSource/Et.RData")
 ```
+
+```{r}
+Proc1 <- Midwest[which(Midwest$hcpcs_code == "93306"),]
+Proc1_Zip1 <- tmp[which(tmp$nppes_provider_zip == "55905"),]
+```
