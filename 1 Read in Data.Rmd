@@ -10,9 +10,37 @@ The "external" data used here was the Medicare Physician and Other Supplier NPI 
 load("~/Dropbox/STAT992/DataSource/Midwest.RData")
 load("~/Dropbox/STAT992/DataSource/Dat.RData")
 load("~/Dropbox/STAT992/DataSource/Et.RData")
+require(dplyr)
 ```
 
+
 ```{r}
-Proc1 <- Midwest[which(Midwest$hcpcs_code == "93306"),]
-Proc1_Zip1 <- tmp[which(tmp$nppes_provider_zip == "55905"),]
+# Row Bind the three Provider Types
+Midwest <- rbind(Cardiology, Surgery, Electrophysiology)
+# Calculate the Difference between Payments and Submitted Amounts
+Midwest <- Midwest %>% mutate(Difference = average_submitted_chrg_amt - average_Medicare_payment_amt)
+# Calculate the Mean and Standard Deviation of Difference For Each Procedure
+tmp <- Midwest %>% group_by(hcpcs_code) %>% 
+  summarize(Mean_Payment = mean(average_Medicare_payment_amt), 
+            Mean_Submitted = mean(average_submitted_chrg_amt), 
+            Mean_Allowed = mean(average_Medicare_allowed_amt), 
+            Mean_Difference = mean(Difference), 
+            SD_Difference = sd(Difference))
+# Calculate Coefficient of Variation
+tmp <- tmp %>% mutate(Coef_Variation = SD_Difference/Mean_Difference)
+# Count the Number of Physicians in each Procedure
+tmp <- left_join(tmp, count(Midwest,hcpcs_code), by="hcpcs_code")
+# Attach the HCPCS Description to the table
+Midwest$hcpcs_description <- as.factor(Midwest$hcpcs_description)
+tmp2 <- Midwest %>% group_by(hcpcs_code) %>% summarize(Description = last(hcpcs_description))
+tmp <- left_join(tmp, tmp2, by="hcpcs_code")
+# Reorder the rows
+tmp <- tmp %>% arrange(desc(Mean_Payment))
+
+Cardiology <- Midwest_Cardiology
+Electrophysiology <- Midwest_Electrophysiology
+Surgery <- Midwest_Surgery
+Summary <- tmp
+Table <- Summary
 ```
+
