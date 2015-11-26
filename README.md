@@ -1,6 +1,7 @@
 ### Project - Why Is There Difference between Medicare Payment, Subimitted Amounts and Amounts Allowed?
 
 每1-2人一个方向，每人1000字+
+
 暂定进度安排：12月1日前各自有处理结果（report草稿，保存好代码和图），12月4日前合并各自attributes整合模型，12月6日完成论文初稿和ppt，12月7日排练，12月8日或10日presentation，presentation之后更改格式上交
 
 #### Data1 Midwest: Physicians, Detailed  
@@ -20,7 +21,7 @@ e.g. 各个层面referral网络的coreness, degree,eigenvector centrality score
 e.g. 设计一些其他的指标  
 
 #### 一些事实
-不同type的医生有相同的procedure
+1.不同type的医生有相同的procedure
 
 #### 一些背景知识（来自网络、文献）
 1.The decision of whether to refer a patient to another physician is an important determinant of health care quality and spending.1- 5 Patients who are referred to specialists tend to incur greater health care spending compared with those who remain within primary care, even after adjusting for health status. 
