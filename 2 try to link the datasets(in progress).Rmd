@@ -1,0 +1,101 @@
+---
+title: '992'
+output: html_document
+---
+
+
+
+```{r}
+library(grDevices)
+library(Matrix)
+library(rARPACK)
+library(plyr)
+suppressPackageStartupMessages(library(dplyr))
+library(ggplot2)
+library(grid)
+library(data.table)
+library(sand) 
+library(network)
+library(sna)
+library(igraph)
+
+
+```
+
+
+
+
+```{r}
+load("~/Dropbox/STAT992/DataSource/Dat.RData")
+load("~/Dropbox/STAT992/DataSource/Et.RData")
+load("~/Dropbox/STAT992/DataSource/Midwest.RData")
+setkey(Et, V1) 
+setkey(Dat, NPI) 
+```
+
+First want to foucs on one state
+
+```{r}
+wisc.referral = Dat[`NPPES Provider State`== "WI"]
+tmp.link.wisc = Et[unique(wisc.referral$NPI)] #link two data sets
+tmp.link.wisc = tmp.link.wisc[complete.cases(tmp.link.wisc)] 
+tmp.link.wisc<-tmp.link.wisc[which(tmp.link.wisc$V2 %in% wisc.referral$NPI)]  
+# only keep the vertice in Wisconsin and individual
+referral.matrix.wisc= as.matrix(tmp.link.wisc)[,1:2]
+referral.undirected.graph.wisc= graph.edgelist(referral.matrix.wisc,directed=F)
+referral.undirected.graph.wisc= simplify(referral.undirected.graph.wisc) #simplify the graph
+```
+
+```{r}
+core.referral.graph.wisc = graph.coreness(referral.undirected.graph.wisc) #get core
+hist(core.referral.graph.wisc)
+sum(core.referral.graph.wisc > 10)
+referral.graph.wisc = induced.subgraph(graph=referral.undirected.graph.wisc,vids=V(referral.undirected.graph.wisc)[core.referral.graph.wisc>10])
+plot(referral.graph.wisc,vertex.size=6,layout=layout.fruchterman.reingold,edge.arrow.size=0.05,vertex.label=NA, main = "Wisconsin Network Graph")
+```
+
+
+graph property
+
+```{r}
+deg.graph.wisc<-degree(referral.undirected.graph.wisc)
+eigen_central<-evcent(referral.undirected.graph.wisc)$vector  # eigenvector centrality score
+```
+
+Dat attribute
+
+```{r}
+referral.wisc.data<-wisc.referral[V(referral.undirected.graph.wisc)]
+payment.wisc<-referral.wisc.data$`Total Medicare Payment Amount`
+number.beneficiaries.wisc<-referral.wisc.data$`Number of Unique Beneficiaries`
+number.service.wisc<-referral.wisc.data$`Number of Services`
+average.age.wisc<-referral.wisc.data$`Average Age of Beneficiaries`
+```
+
+
+```{r}
+frame<-data.frame(V(referral.undirected.graph.wisc)$name,deg.graph.wisc,eigen_central)
+frame$NPI<-as.character(frame$NPI)
+colnames(frame)<-c("NPI","degree","central_score")
+```
+
+
+for procedure
+
+
+```{r}
+detail<-Cardiology[Cardiology$hcpcs_code=="33249",]
+detail2<-Surgery[Surgery$hcpcs_code=="33249",]
+detail3<-Electrophysiology[Electrophysiology$hcpcs_code=="33249",]
+```
+
+in fact, there is small number of a specific procedure in only a state
+
+model
+
+```{r}
+fit1<-lm(payment.wisc~deg.graph.wisc+eigen_central+average.age.wisc+number.service.wisc)
+summary(fit1)
+```
+
+
