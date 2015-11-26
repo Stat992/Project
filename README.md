@@ -14,7 +14,16 @@ e.g. zipcode -> 坐标 -> 距离
 
 #### Data3 Et: the Referral Network  
 选取一些网络图特征作为解释变量  
-e.g. 各个层面referral网络的coreness, degree   
+e.g. 各个层面referral网络的coreness, degree,eigenvector centrality score   
 e.g. 设计一些其他的指标  
 
+#### 一些事实
+不同type的医生有相同的procedure
+
+#### 一些背景知识（来自网络、文献）
+1.The decision of whether to refer a patient to another physician is an important determinant of health care quality and spending.1- 5 Patients who are referred to specialists tend to incur greater health care spending compared with those who remain within primary care, even after adjusting for health status. 
+
+2.They are permitted to charge you only 15 percent more than the Medicare-approved amount, and you must pay that extra amount. This is called the "limiting charge" and you do not have to pay more than this amount.
+
+3.Coinsurance is the amount the patient is responsible for paying after the deductible is met,the coinsurance is the difference between the Medicare approved amount and the Medicare payment, which is usually 20% of the approved amount.
 
