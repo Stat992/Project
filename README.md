@@ -1,5 +1,7 @@
 ### Project - Why Is There Difference between Medicare Payment, Subimitted Amounts and Amounts Allowed?
 
+每1-2人一个方向，每人1000字+
+暂定进度安排：12月1日前各自有处理结果（report草稿，保存好代码和图），12月4日前合并各自attributes整合模型，12月6日完成论文初稿和ppt，12月7日排练，12月8日或10日presentation，presentation之后更改格式上交
 
 #### Data1 Midwest: Physicians, Detailed  
 Region: U.S. Midwest, 12 States  
