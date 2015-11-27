@@ -7,7 +7,7 @@
 #### Data1 Midwest: Physicians, Detailed  
 Region: U.S. Midwest, 12 States  
 Provider Types: Cardiology, Cardiac Surgery, Cardiac Electrophysiology  
-选择Procedure 33533 和 Procedure 92928 进行研究  
+**选择Procedure 33533 和 Procedure 92928 进行研究**
 计算各Procedure中的Payment&Submitted之差作为响应变量  
 
 #### Data2 Dat: Physicians, Aggregated  
