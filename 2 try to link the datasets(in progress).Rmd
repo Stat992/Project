@@ -16,7 +16,7 @@ library(grid)
 library(data.table)
 library(sand) 
 library(network)
-library(sna)
+#library(sna)
 library(igraph)
 
 
@@ -36,47 +36,47 @@ setkey(Dat, NPI)
 First want to foucs on one state
 
 ```{r}
-wisc.referral = Dat[`NPPES Provider State`== "WI"]
-tmp.link.wisc = Et[unique(wisc.referral$NPI)] #link two data sets
-tmp.link.wisc = tmp.link.wisc[complete.cases(tmp.link.wisc)] 
-tmp.link.wisc<-tmp.link.wisc[which(tmp.link.wisc$V2 %in% wisc.referral$NPI)]  
-# only keep the vertice in Wisconsin and individual
-referral.matrix.wisc= as.matrix(tmp.link.wisc)[,1:2]
-referral.undirected.graph.wisc= graph.edgelist(referral.matrix.wisc,directed=F)
-referral.undirected.graph.wisc= simplify(referral.undirected.graph.wisc) #simplify the graph
+data.referral = Dat[`NPPES Provider State` %in% c("IA","IL","IN","KS","MI" ,"MN","MO","ND","NE","OH","SD","WI")]
+tmp.link = Et[unique(data.referral$NPI)] #link two data sets
+tmp.link = tmp.link[complete.cases(tmp.link)] 
+tmp.link<-tmp.link[which(tmp.link$V2 %in% data.referral$NPI)]  
+# only keep the vertice in midwest and individual
+referral.matrix= as.matrix(tmp.link)[,1:2]
+referral.undirected.graph= graph.edgelist(referral.matrix,directed=F)
+referral.undirected.graph= simplify(referral.undirected.graph) #simplify the graph
 ```
 
 ```{r}
-core.referral.graph.wisc = graph.coreness(referral.undirected.graph.wisc) #get core
-hist(core.referral.graph.wisc)
-sum(core.referral.graph.wisc > 10)
-referral.graph.wisc = induced.subgraph(graph=referral.undirected.graph.wisc,vids=V(referral.undirected.graph.wisc)[core.referral.graph.wisc>10])
-plot(referral.graph.wisc,vertex.size=6,layout=layout.fruchterman.reingold,edge.arrow.size=0.05,vertex.label=NA, main = "Wisconsin Network Graph")
+core.referral.graph = graph.coreness(referral.undirected.graph) #get core
+hist(core.referral.graph)
+sum(core.referral.graph > 30)
+referral.graph = induced.subgraph(graph=referral.undirected.graph,vids=V(referral.undirected.graph)[core.referral.graph>30])
+locs = layout.fruchterman.reingold(referral.graph)
+plot(referral.graph,vertex.size=6,layout=locs,edge.arrow.size=0.05,vertex.label=NA, main = "Network Graph")
 ```
-
 
 graph property
 
 ```{r}
-deg.graph.wisc<-degree(referral.undirected.graph.wisc)
-eigen_central<-evcent(referral.undirected.graph.wisc)$vector  # eigenvector centrality score
+deg.graph<-degree(referral.undirected.graph)
+eigen_central<-evcent(referral.undirected.graph)$vector  # eigenvector centrality score
 ```
 
 Dat attribute
 
 ```{r}
-referral.wisc.data<-wisc.referral[V(referral.undirected.graph.wisc)]
-payment.wisc<-referral.wisc.data$`Total Medicare Payment Amount`
-number.beneficiaries.wisc<-referral.wisc.data$`Number of Unique Beneficiaries`
-number.service.wisc<-referral.wisc.data$`Number of Services`
-average.age.wisc<-referral.wisc.data$`Average Age of Beneficiaries`
+referral.frame.data<-data.referral[V(referral.undirected.graph)]
+payment<-referral.frame.data$`Total Medicare Payment Amount`
+number.beneficiaries<-referral.frame.data$`Number of Unique Beneficiaries`
+number.service<-referral.frame.data$`Number of Services`
+average.age.wisc<-referral.frame.data$`Average Age of Beneficiaries`
 ```
 
 
 ```{r}
-frame<-data.frame(V(referral.undirected.graph.wisc)$name,deg.graph.wisc,eigen_central)
-frame$NPI<-as.character(frame$NPI)
+frame<-data.frame(V(referral.undirected.graph)$name,deg.graph,eigen_central)
 colnames(frame)<-c("NPI","degree","central_score")
+frame$NPI<-as.character(frame$NPI)
 ```
 
 
@@ -84,12 +84,12 @@ for procedure
 
 
 ```{r}
-detail<-Cardiology[Cardiology$hcpcs_code=="33249",]
-detail2<-Surgery[Surgery$hcpcs_code=="33249",]
-detail3<-Electrophysiology[Electrophysiology$hcpcs_code=="33249",]
+Bypass.frame<-frame[which(frame$NPI %in% Bypass$NPI),]
+mm<-match(Bypass$NPI,frame$NPI)
+frame<-complete.cases(frame[match(Bypass$NPI,frame$NPI),]) 
+Bypass.frame.all<-cbind(Bypass.frame,Bypass$average_Medicare_payment_amt,Bypass$Difference)
 ```
 
-in fact, there is small number of a specific procedure in only a state
 
 model
 
