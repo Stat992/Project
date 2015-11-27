@@ -97,3 +97,11 @@ Electrophysiology <- Midwest_Electrophysiology
 Surgery <- Midwest_Surgery
 Summary <- tmp
 Table <- Summary
+
+
+### 33533 & 92928
+Midwest <- rbind(Cardiology, Electrophysiology, Surgery)
+Bypass <- Midwest[which(Midwest$hcpcs_code == 33533),]
+Bypass <- Bypass %>% mutate(Difference = average_submitted_chrg_amt - average_Medicare_payment_amt)
+Stent <- Midwest[which(Midwest$hcpcs_code == 92928),]
+Stent <- Bypass %>% mutate(Difference = average_submitted_chrg_amt - average_Medicare_payment_amt)
