@@ -46,12 +46,18 @@ referral.undirected.graph= graph.edgelist(referral.matrix,directed=F)
 referral.undirected.graph= simplify(referral.undirected.graph) #simplify the graph
 ```
 
+### 可先不管core
+
 ```{r}
 core.referral.graph = graph.coreness(referral.undirected.graph) #get core
+referral.graph = induced.subgraph(graph=referral.undirected.graph,vids=V(referral.undirected.graph)[core.referral.graph>0])
+
+
 hist(core.referral.graph)
 sum(core.referral.graph > 30)
 referral.graph = induced.subgraph(graph=referral.undirected.graph,vids=V(referral.undirected.graph)[core.referral.graph>30])
-locs = layout.fruchterman.reingold(referral.graph)
+#locs = layout.fruchterman.reingold(referral.graph)
+locs = layout.out(referral.graph)
 plot(referral.graph,vertex.size=6,layout=locs,edge.arrow.size=0.05,vertex.label=NA, main = "Network Graph")
 ```
 
@@ -60,6 +66,10 @@ graph property
 ```{r}
 deg.graph<-degree(referral.undirected.graph)
 eigen_central<-evcent(referral.undirected.graph)$vector  # eigenvector centrality score
+eigen_central<-closeness(referral.undirected.graph)$vector
+bet<-betweenness(referral.undirected.graph)
+close<-closeness(referral.undirected.graph)
+
 ```
 
 Dat attribute
