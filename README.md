@@ -18,6 +18,7 @@ e.g. zipcode -> 坐标 -> 距离
 #### Data3 Et: the Referral Network  
 选取一些网络图特征作为解释变量  
 e.g. 各个层面referral网络的coreness, degree,eigenvector centrality score   
+- closeness centrality, betweenness centrality, and eigenvector centrality
 e.g. 设计一些其他的指标  
 
 #### 一些事实
