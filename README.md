@@ -1,4 +1,4 @@
-### Project - Why Is There Difference between Medicare Payment, Subimitted Amounts and Amounts Allowed?
+### Project - Why Is There Difference between Medicare Payment and Subimitted Amounts (or Amounts Allowed)?
 
 每1-2人一个方向，每人1000字+
 
