@@ -1,0 +1,216 @@
+---
+title: '992'
+output: html_document
+---
+
+
+
+```{r}
+library(grDevices)
+library(Matrix)
+library(rARPACK)
+library(plyr)
+suppressPackageStartupMessages(library(dplyr))
+library(ggplot2)
+library(grid)
+library(data.table)
+library(sand) 
+library(network)
+#library(sna)
+library(igraph)
+require(MASS)
+
+```
+
+
+
+
+```{r}
+load("~/Dropbox/STAT992/DataSource/Dat.RData")
+load("~/Dropbox/STAT992/DataSource/Et.RData")
+load("~/Dropbox/STAT992/DataSource/Midwest.RData")
+load("~/Dropbox/STAT992/DataSource/Predictors.RData")
+load("~/Dropbox/STAT992/DataSource/Model.RData")
+setkey(Et, V1) 
+setkey(Dat, NPI) 
+```
+
+ 
+refer to all country
+
+```{r}
+data.referral = Dat[`NPPES Provider State` %in% c("IA","IL","IN","KS","MI" ,"MN","MO","ND","NE","OH","SD","WI")]
+tmp.link = Et[unique(data.referral$NPI)] #link two data sets
+tmp.link = tmp.link[complete.cases(tmp.link)] 
+referral.matrix= as.matrix(tmp.link)[,1:2]
+referral.undirected.graph= graph.edgelist(referral.matrix,directed=F)
+referral.undirected.graph= simplify(referral.undirected.graph) 
+```
+
+
+
+```{r}
+deg.graph<-degree(referral.undirected.graph)
+eigen_central<-evcent(referral.undirected.graph)$vector  # eigenvector centrality score
+#bet<-betweenness(referral.undirected.graph)
+#close<-closeness(referral.undirected.graph)
+```
+
+
+```{r}
+frame<-data.frame(V(referral.undirected.graph)$name,deg.graph,eigen_central)
+colnames(frame)<-c("NPI","degree","central_score")
+frame$NPI<-as.character(frame$NPI)
+```
+
+
+
+
+refer to midwest 
+
+
+```{r}
+data.referral = Dat[`NPPES Provider State` %in% c("IA","IL","IN","KS","MI" ,"MN","MO","ND","NE","OH","SD","WI")]
+tmp.link = Et[unique(data.referral$NPI)] #link two data sets
+tmp.link = tmp.link[complete.cases(tmp.link)] 
+tmp.link<-tmp.link[which(tmp.link$V2 %in% data.referral$NPI)]  
+# only keep the vertice in midwest and individual
+referral.matrix= as.matrix(tmp.link)[,1:2]
+referral.undirected.graph= graph.edgelist(referral.matrix,directed=F)
+referral.undirected.graph= simplify(referral.undirected.graph) 
+```
+
+
+```{r}
+m.deg.graph<-degree(referral.undirected.graph)
+m.eigen_central<-evcent(referral.undirected.graph)$vector  # eigenvector centrality score
+#bet<-betweenness(referral.undirected.graph)
+#close<-closeness(referral.undirected.graph)
+```
+
+```{r}
+m.frame<-data.frame(V(referral.undirected.graph)$name,m.deg.graph,m.eigen_central)
+colnames(m.frame)<-c("NPI","m_degree","m_central_score")
+m.frame$NPI<-as.character(m.frame$NPI)
+```
+
+
+
+
+
+
+###  画图
+
+```{r}
+core.referral.graph = graph.coreness(referral.undirected.graph) #get core
+hist(core.referral.graph)
+sum(core.referral.graph > 30)
+referral.graph = induced.subgraph(graph=referral.undirected.graph,vids=V(referral.undirected.graph)[core.referral.graph>30])
+#locs = layout.fruchterman.reingold(referral.graph)
+locs = layout.out(referral.graph)
+plot(referral.graph,vertex.size=6,layout=locs,edge.arrow.size=0.05,vertex.label=NA, main = "Network Graph")
+```
+
+network in 3 types
+
+```{r}
+type=c("Cardiology","Cardiac Surgery","Cardiac Electrophysiology")
+dat.3type=Dat[which(Dat$`Provider Type` %in% type),]
+data.referral = dat.3type[`NPPES Provider State` %in% c("IA","IL","IN","KS","MI" ,"MN","MO","ND","NE","OH","SD","WI")]
+tmp.link = Et[unique(data.referral$NPI)] #link two data sets
+tmp.link = tmp.link[complete.cases(tmp.link)] 
+tmp.link<-tmp.link[which(tmp.link$V2 %in% data.referral$NPI)]  
+# only keep the vertice in midwest and individual
+referral.matrix= as.matrix(tmp.link)[,1:2]
+referral.undirected.graph= graph.edgelist(referral.matrix,directed=F)
+referral.undirected.graph= simplify(referral.undirected.graph) #simplify the graph
+
+
+
+```
+
+
+for procedure
+
+
+```{r}
+
+tmp<-frame[which(frame$NPI %in% Stent$NPI),]
+
+tmp2<-merge(m.frame,tmp,by = "NPI")
+##由于没有dat数据就暂时删掉na
+tmp3 <- merge(Pred, tmp2[which(tmp2$NPI %in% Pred$NPI), ], by = "NPI")
+```
+
+
+
+```{r}
+state.table=data.frame()
+for(x in c("IA","IL","IN","KS","MI" ,"MN","MO","ND","NE","OH","SD","WI")){
+data.referral = Dat[`NPPES Provider State`==x]
+tmp.link = Et[unique(data.referral$NPI)] #link two data sets
+tmp.link = tmp.link[complete.cases(tmp.link)] 
+tmp.link<-tmp.link[which(tmp.link$V2 %in% data.referral$NPI)]  
+# only keep the vertice in midwest and individual
+referral.matrix= as.matrix(tmp.link)[,1:2]
+referral.undirected.graph= graph.edgelist(referral.matrix,directed=F)
+referral.undirected.graph= simplify(referral.undirected.graph) 
+deg.graph<-degree(referral.undirected.graph)
+eigen_central<-evcent(referral.undirected.graph)$vector
+frame<-data.frame(V(referral.undirected.graph)$name,deg.graph,eigen_central)
+colnames(frame)<-c("NPI","degree","central_score")
+frame$NPI<-as.character(frame$NPI)
+Stent.frame<-frame[which(frame$NPI %in% Stent$NPI),]
+state.table=rbind(state.table,Stent.frame)
+}
+colnames(state.table)<-c("NPI","state_degree","state_central_score")
+
+```
+
+
+```{r}
+data.all <- merge(tmp3, state.table[which(state.table$NPI %in% tmp3$NPI), ], by = "NPI")
+```
+
+model
+
+```{r}
+
+data.all<- data.all[complete.cases(data.all),]
+
+#fit1<-lm(average_Medicare_allowed_amt  ~ . - NPI - Differ_rate - Difference - average_Medicare_payment_amt, tmp)
+#summary(fit1)
+#fit2 <- stepAIC(fit1)
+#summary(fit2)
+
+
+#  少量变量
+data.all[,36:41]<-scale(data.all[,36:41])
+fit1<-lm(average_Medicare_payment_amt~degree+central_score+m_degree+m_central_score+state_degree+state_central_score, data.all)
+summary(fit1)
+fit2 <- stepAIC(fit1)
+summary(fit2)
+
+
+
+# payment
+fit1<-lm(average_Medicare_payment_amt  ~ . - NPI - Differ_rate - Difference  - average_Medicare_allowed_amt -nppes_provider_zip, data.all)
+summary(fit1)
+fit2 <- stepAIC(fit1)
+summary(fit2)
+
+
+# difference
+fit0<-lm( Difference  ~ . - NPI - Differ_rate - average_submitted_chrg_amt -average_Medicare_payment_amt  - nppes_provider_zip, data.all)
+summary(fit0)
+fit00 <- stepAIC(fit0)
+summary(fit00)
+
+
+```
+
+
+```{r}
+setwd("~/Desktop/USA/course/992/project/data")
+save(data.all,file="data for final modeling.RData")
+```
