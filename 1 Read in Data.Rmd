@@ -7,14 +7,26 @@ output: html_document
 The "external" data used here was the Medicare Physician and Other Supplier NPI Aggregate and Detailed tables found at  [the CMS website](https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Medicare-Provider-Charge-Data/Physician-and-Other-Supplier2013.html). The tables were well organized by NPI and contain columns of categorical and numerical data to be analyzed.  
 
 ```{r read in data}
-load("~/Dropbox/STAT992/DataSource/Midwest.RData")
-load("~/Dropbox/STAT992/DataSource/Dat.RData")
 load("~/Dropbox/STAT992/DataSource/Et.RData")
+load("~/Dropbox/STAT992/DataSource/Dat.RData")
+load("~/Dropbox/STAT992/DataSource/Midwest.RData")
+load("~/Dropbox/STAT992/DataSource/Model.RData")
 require(dplyr)
+require(glmnet)
+require(MASS)
+require(lars)
 ```
 
 
 ```{r}
-
+colnames(data.all)
+cor(data.all[,36:41])
+Data <- data.all[,c(2,4,5,8,11:41)]
+colnames(Data)
+lm1 <- lm(average_Medicare_payment_amt~., Data)
+summary(lm1)
+lm2 <- stepAIC(lm1)
+summary(lm2)
+cv.lars(x = as.matrix(Data[,c(3,5:35)]), y = as.vector(Data[,4]))
+summary(LASSO)
 ```
-

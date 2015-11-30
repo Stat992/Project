@@ -75,6 +75,7 @@ Midwest <- rbind(Cardiology, Surgery, Electrophysiology)
 # Calculate the Difference between Payments and Submitted Amounts
 Midwest <- Midwest %>% mutate(Difference = average_submitted_chrg_amt - average_Medicare_payment_amt)
 # Calculate the Mean and Standard Deviation of Difference For Each Procedure
+# Midwest <- Midwest %>% filter(medicare_participation_indicator == "N")
 tmp <- Midwest %>% group_by(hcpcs_code) %>% 
   summarize(Mean_Payment = mean(average_Medicare_payment_amt), 
             Mean_Submitted = mean(average_submitted_chrg_amt), 
@@ -103,5 +104,34 @@ Table <- Summary
 Midwest <- rbind(Cardiology, Electrophysiology, Surgery)
 Bypass <- Midwest[which(Midwest$hcpcs_code == 33533),]
 Bypass <- Bypass %>% mutate(Difference = average_submitted_chrg_amt - average_Medicare_payment_amt)
+Bypass <- Bypass %>% mutate(Differ_rate = Difference / average_submitted_chrg_amt)
 Stent <- Midwest[which(Midwest$hcpcs_code == 92928),]
-Stent <- Bypass %>% mutate(Difference = average_submitted_chrg_amt - average_Medicare_payment_amt)
+Stent <- Stent %>% mutate(Difference = average_submitted_chrg_amt - average_Medicare_payment_amt)
+Stent <- Stent %>% mutate(Differ_rate = Difference / average_submitted_chrg_amt)
+
+
+### 
+completeBypass <-  merge(Bypass, Dat[which(Dat$NPI %in% Bypass$NPI), ],by = "NPI")
+completeStent <-  merge(Stent, Dat[which(Dat$NPI %in% Stent$NPI), ], by = "NPI")
+completeBypass <- as.data.frame(completeBypass)
+completeStent <- as.data.frame(completeStent)
+Pred <- rbind(completeBypass, completeStent)
+Pred <- as.data.frame(Pred)
+colnames(Pred)
+# diff_rate <- c(1,6,12,21,30,38,39,40,58,63,64,86,89)
+
+# Difference Rate
+diff_rate <- c(6,12,21,23,30,38,39,40,58,63,64,73:88,89)
+diff_rate <- completeStent[,diff_rate]
+LM1 <- lm(Differ_rate~. , data=diff_rate)
+summary(LM1)
+
+# Submitted
+diff_rate <- c(1,6,11,12,21,23,25,27,29,30,38:40,58,63:65,71,73:88,89)
+diff_rate <- completeStent[,diff_rate]
+summary(LM1)
+summary(LM2)
+summary(LM3)
+colnames(diff_rate)
+cor(diff_rate[,6:10])
+Pred <- diff_rate
